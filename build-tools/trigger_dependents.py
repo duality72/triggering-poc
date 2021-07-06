@@ -42,14 +42,16 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                     continue
                 _debug(f"...checking {line}")
                 if line in published_dependencies:
-                    _debug(f"Dependency found!")
+                    _debug(f"...adding dependent {subdirectory}")
                     dependents.add(subdirectory)
     return dependents
 
 
 def get_bk_steps(this_build:str, dependents: Set[str]) -> str:
+    _debug(f"Generating dependent trigger steps for {this_build}")
     steps = f"steps:\n"
     for dep in dependents:
+        _debug(f"...adding trigger step for {dep}")
         dep = dep.replace('/', '-')
         steps += f"""
   - trigger: {dep}
