@@ -30,10 +30,9 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
             dependents = dependents.union(find_dependents(subdirectory_entry, published_dependencies))
             continue
         _debug("...checking dependencies file")
-        if not entry == "dependencies.txt":
+        if entry != "dependencies.txt":
             continue
-        dependencies_file: str = full_entry_path + f"{entry}"
-        with open(dependencies_file, 'r') as file1:
+        with open(full_entry_path, 'r') as file1:
             for line in file1:
                 if '#' in line:
                     i = line.index("#")
