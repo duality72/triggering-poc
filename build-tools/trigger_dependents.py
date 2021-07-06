@@ -24,7 +24,7 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
     for entry in list_of_files:
         if entry == '.git':
             continue
-        subdirectory_entry = subdirectory + '/' + entry
+        subdirectory_entry = subdirectory + '/' + entry if subdirectory else entry
         full_entry_path: str = _full_path(subdirectory_entry)
         if os.path.isdir(full_entry_path):
             dependents = dependents.union(find_dependents(subdirectory_entry, published_dependencies))
@@ -40,7 +40,7 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                 line = line.strip()
                 if not line:
                     continue
-                _debug(f"...checking {line}")
+                _debug(f"...checking if {line} is one of the published dependencies")
                 if line in published_dependencies:
                     _debug(f"...adding dependent {subdirectory}")
                     dependents.add(subdirectory)
@@ -67,7 +67,7 @@ def upload_bk_steps(steps: str):
 
 
 def main() -> None:
-    this_build: str = os.environ.get("BUILDKITE_PIPELINE_NAME")
+    this_build: str = os.environ.get("PUBLISHED_BUILD")
     # Splitting on regex might be better here
     just_published_dependencies: List[str] = os.environ.get("PUBLISHED_DEPENDENCIES").split()
     dependents: Set[str] = find_dependents('', just_published_dependencies)
