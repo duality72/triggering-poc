@@ -11,13 +11,13 @@ debug: bool = os.environ.get("DEBUG_OUTPUT").lower() == 'true'
 def _debug(output: str) -> None:
     if not debug:
         return
-    print(output)
+    print("--- " + output)
 
 def _full_path(subdirectory: str) -> str:
     return root_dir + '/' + subdirectory
 
 
-def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
+def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set[str]:
     _debug(f"Finding dependents in {subdirectory}")
     dependents: Set[str] = set()
     list_of_files = os.listdir(_full_path(subdirectory))
@@ -25,7 +25,7 @@ def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
         subdirectory_entry = subdirectory + '/' + entry
         full_entry_path: str = _full_path(subdirectory_entry)
         if os.path.isdir(full_entry_path):
-            dependents = dependents.union(find_dependents(subdirectory_entry, dependencies))
+            dependents = dependents.union(find_dependents(subdirectory_entry, published_dependencies))
             continue
         dependencies_file: str = full_entry_path + '/dependencies.txt'
         if not os.path.isfile(dependencies_file):
@@ -39,7 +39,7 @@ def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
                 if not line:
                     continue
                 _debug(f"...checking {line}")
-                if line in dependencies:
+                if line in published_dependencies:
                     _debug(f"Dependency found!")
                     dependents.add(subdirectory)
     return dependents
