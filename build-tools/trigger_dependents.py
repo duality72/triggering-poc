@@ -15,9 +15,10 @@ def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
     dependents: Set[str] = set()
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
-        full_entry_path: str = _full_path(subdirectory + '/' + entry)
+        subdirectory_entry = subdirectory + '/' + entry
+        full_entry_path: str = _full_path(subdirectory_entry)
         if os.path.isdir(full_entry_path):
-            dependents = dependents.union(find_dependents(full_entry_path, dependencies))
+            dependents = dependents.union(find_dependents(subdirectory_entry, dependencies))
             continue
         dependencies_file: str = full_entry_path + '/dependencies.txt'
         if not os.path.isfile(dependencies_file):
