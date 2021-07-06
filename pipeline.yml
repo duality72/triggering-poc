@@ -1,0 +1,8 @@
+steps:
+  - command: "echo \\$BUILDKITE_PIPELINE_NAME"
+  - wait
+  - trigger: trigger-dependents
+    async: true
+    build:
+      env:
+        PUBLISHED_DEPENDENCIES: $BUILDKITE_PIPELINE_NAME
