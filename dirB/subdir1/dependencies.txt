@@ -1,0 +1,2 @@
+dirA/subdir2
+dirB/subdir2
