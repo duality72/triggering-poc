@@ -56,7 +56,7 @@ def main() -> None:
     this_build: str = os.environ.get("BUILDKITE_PIPELINE_NAME")
     # Splitting on regex might be better here
     just_published_dependencies: List[str] = os.environ.get("PUBLISHED_DEPENDENCIES").split()
-    dependents: Set[str] = find_dependents(root_dir, just_published_dependencies)
+    dependents: Set[str] = find_dependents('', just_published_dependencies)
     if not dependents:
         print("No dependent components found.")
         return
