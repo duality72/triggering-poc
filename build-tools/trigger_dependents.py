@@ -5,7 +5,7 @@ import subprocess
 from typing import List, Set
 
 root_dir: str = os.environ.get("BUILDKITE_BUILD_CHECKOUT_PATH")
-debug: bool = os.environ.get("DEBUG_OUTPUT").lower() == 'true'
+debug: bool = os.environ.get("DEBUG_OUTPUT", 'false').lower() == 'true'
 
 
 def _debug(output: str) -> None:
