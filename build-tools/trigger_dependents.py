@@ -22,14 +22,17 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
     dependents: Set[str] = set()
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
+        if entry == '.git':
+            continue
         subdirectory_entry = subdirectory + '/' + entry
         full_entry_path: str = _full_path(subdirectory_entry)
         if os.path.isdir(full_entry_path):
             dependents = dependents.union(find_dependents(subdirectory_entry, published_dependencies))
             continue
-        dependencies_file: str = full_entry_path + '/dependencies.txt'
-        if not os.path.isfile(dependencies_file):
+        _debug("...checking dependencies file")
+        if not entry == "dependencies.txt":
             continue
+        dependencies_file: str = full_entry_path + f"{entry}"
         with open(dependencies_file, 'r') as file1:
             for line in file1:
                 if '#' in line:
