@@ -52,7 +52,7 @@ def get_bk_steps(this_build:str, dependents: Set[str]) -> str:
     steps = f"steps:\n"
     for dep in dependents:
         _debug(f"...adding trigger step for {dep}")
-        dep = dep.replace('/', '-')
+        dep = dep.replace('/', '-').lower()
         steps += f"""
   - trigger: {dep}
     async: true
