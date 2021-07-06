@@ -5,13 +5,20 @@ import subprocess
 from typing import List, Set
 
 root_dir: str = os.environ.get("BUILDKITE_BUILD_CHECKOUT_PATH")
+debug: bool = os.environ.get("DEBUG_OUTPUT").lower() == 'true'
 
+
+def _debug(output: str) -> None:
+    if not debug:
+        return
+    print(output)
 
 def _full_path(subdirectory: str) -> str:
     return root_dir + '/' + subdirectory
 
 
 def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
+    _debug(f"Finding dependents in {subdirectory}")
     dependents: Set[str] = set()
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
@@ -31,7 +38,9 @@ def find_dependents(subdirectory: str, dependencies: List[str]) -> Set[str]:
                 line = line.strip()
                 if not line:
                     continue
+                _debug(f"...checking {line}")
                 if line in dependencies:
+                    _debug(f"Dependency found!")
                     dependents.add(subdirectory)
     return dependents
 
