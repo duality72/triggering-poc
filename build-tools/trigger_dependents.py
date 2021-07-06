@@ -63,7 +63,7 @@ def get_bk_steps(this_build:str, dependents: Set[str]) -> str:
     return steps
 
 def upload_bk_steps(steps: str):
-    subprocess.run(['buildkite-agent', 'pipeline', 'upload'], input=steps, text=True)
+    subprocess.run(['buildkite-agent', 'pipeline', 'upload'], input=steps, text=True, check=True)
 
 
 def main() -> None:
