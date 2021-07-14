@@ -36,7 +36,9 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                     continue
                 if '=' not in line:
                     _debug(f"...bad cluster line! -> {line}")
-                cluster_name: str, *cluster_members, = re.split('=,\s', line)
+                cluster_name: str
+                cluster_members: Set[str]
+                cluster_name, *cluster_members, = re.split(r'[=,\s]', line)
                 for member in cluster_members:
                     all_cluster_members.add(member)
                     if member in published_dependencies:
