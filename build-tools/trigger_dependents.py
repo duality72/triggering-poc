@@ -44,7 +44,6 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                         _debug(f"...{member} is already in a cluster!")
                         exit(1)
                     all_cluster_members[member] = f"cluster/{cluster_name}"
-                    if cluster_name in published_dependencies
 
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
