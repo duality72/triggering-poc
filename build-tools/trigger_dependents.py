@@ -68,11 +68,22 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                 if line in all_cluster_members:
                     _debug(f"...checking if {line}'s cluster was published")
                     if all_cluster_members[line] in published_dependencies:
+                        if subdirectory in all_cluster_members:
+                            if all_cluster_members[subdirectory] in published_dependencies:
+                                _debug(f"...part of the same published cluster. Skipping.")
+                                continue
+                            _debug(
+                                f"...{subdirectory} is part of a cluster. Adding dependent {all_cluster_members[subdirectory]}")
+                            dependents.add(all_cluster_members[subdirectory])
+                            continue
                         _debug(f"...adding dependent {subdirectory}")
                         dependents.add(subdirectory)
                     continue
                 _debug(f"...checking if {line} is one of the published dependencies")
                 if line in published_dependencies:
+                    if all_cluster_members[subdirectory] in published_dependencies:
+                        _debug(f"...part of the same published cluster. Skipping.")
+                        continue
                     if subdirectory in all_cluster_members:
                         _debug(f"...{subdirectory} is part of a cluster. Adding dependent {all_cluster_members[subdirectory]}")
                         dependents.add(all_cluster_members[subdirectory])
