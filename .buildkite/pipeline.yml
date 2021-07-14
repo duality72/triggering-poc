@@ -6,3 +6,4 @@ steps:
     build:
       env:
         PUBLISHED_DEPENDENCIES: $BUILDKITE_PIPELINE_NAME
+        DEBUG_OUTPUT: true
