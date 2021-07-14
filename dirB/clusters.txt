@@ -1,0 +1,1 @@
+cluster2=dirB/subdir1,dirB/subdir2

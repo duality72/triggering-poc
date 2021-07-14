@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import os
+import re
 import subprocess
-from typing import List, Set
+from typing import List, Set, Tuple
 
 root_dir: str = os.environ.get("BUILDKITE_BUILD_CHECKOUT_PATH")
 debug: bool = os.environ.get("DEBUG_OUTPUT", 'false').lower() == 'true'
+all_cluster_members: Set[str] = set()
 
 
 def _debug(output: str) -> None:
@@ -18,8 +20,29 @@ def _full_path(subdirectory: str) -> str:
 
 
 def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set[str]:
-    _debug(f"Finding dependents in {subdirectory}")
     dependents: Set[str] = set()
+    _debug(f"Finding dependents in {subdirectory}")
+    clusters_file_path: str = subdirectory + "/clusters.txt"
+
+    if os.path.isfile(clusters_file_path):
+        _debug(f"...reading clusters in {clusters_file_path}")
+        with open(clusters_file_path, 'r') as clusters_file:
+            for line in clusters_file:
+                if '#' in line:
+                    i = line.index("#")
+                    line = line[0:i]
+                line = line.strip()
+                if not line:
+                    continue
+                if '=' not in line:
+                    _debug(f"...bad cluster line! -> {line}")
+                cluster_name: str, *cluster_members, = re.split('=,\s', line)
+                for member in cluster_members:
+                    all_cluster_members.add(member)
+                    if member in published_dependencies:
+                        _debug(f"...adding dependent cluster {cluster_name}")
+                        dependents.add(f"cluster/{cluster_name}")
+
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
         if entry == '.git':
@@ -29,9 +52,12 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
         if os.path.isdir(full_entry_path):
             dependents = dependents.union(find_dependents(subdirectory_entry, published_dependencies))
             continue
-        _debug("...checking dependencies file")
         if entry != "dependencies.txt":
             continue
+        if subdirectory in all_cluster_members:
+            _debug(f"...{subdirectory} is already in a cluster")
+            continue
+        _debug("...checking dependencies file")
         with open(full_entry_path, 'r') as file1:
             for line in file1:
                 if '#' in line:
