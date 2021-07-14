@@ -3,11 +3,11 @@
 import os
 import re
 import subprocess
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict
 
 root_dir: str = os.environ.get("BUILDKITE_BUILD_CHECKOUT_PATH")
 debug: bool = os.environ.get("DEBUG_OUTPUT", 'false').lower() == 'true'
-all_cluster_members: Set[str] = set()
+all_cluster_members: Dict[str, str] = {}
 
 
 def _debug(output: str) -> None:
@@ -37,13 +37,13 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                 if '=' not in line:
                     _debug(f"...bad cluster line! -> {line}")
                 cluster_name: str
-                cluster_members: Set[str]
+                cluster_members: Tuple[str]
                 cluster_name, *cluster_members, = re.split(r'[=,\s]', line)
                 for member in cluster_members:
-                    all_cluster_members.add(member)
-                    if member in published_dependencies:
-                        _debug(f"...adding dependent cluster {cluster_name}")
-                        dependents.add(f"cluster/{cluster_name}")
+                    if member in all_cluster_members:
+                        _debug(f"...{member} is already in a cluster!")
+                        exit(1)
+                    all_cluster_members[member] = f"cluster/{cluster_name}"
 
     list_of_files = os.listdir(_full_path(subdirectory))
     for entry in list_of_files:
@@ -56,9 +56,6 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
             continue
         if entry != "dependencies.txt":
             continue
-        if subdirectory in all_cluster_members:
-            _debug(f"...{subdirectory} is already in a cluster")
-            continue
         _debug("...checking dependencies file")
         with open(full_entry_path, 'r') as file1:
             for line in file1:
@@ -70,6 +67,10 @@ def find_dependents(subdirectory: str, published_dependencies: List[str]) -> Set
                     continue
                 _debug(f"...checking if {line} is one of the published dependencies")
                 if line in published_dependencies:
+                    if subdirectory in all_cluster_members:
+                        _debug(f"...{subdirectory} is part of a cluster. Adding dependent {all_cluster_members[subdirectory]}")
+                        dependents.add(all_cluster_members[subdirectory])
+                        continue
                     _debug(f"...adding dependent {subdirectory}")
                     dependents.add(subdirectory)
     return dependents
