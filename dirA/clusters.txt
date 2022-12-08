@@ -1,1 +1,2 @@
 cluster1=dirA/subdir2,dirA/subdir3
+
